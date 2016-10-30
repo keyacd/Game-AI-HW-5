@@ -89,7 +89,7 @@ class window(QWidget):
 		self.cb = QComboBox()
 		self.cb.addItems(self.maps)
 		self.cb.currentIndexChanged.connect(self.comboChange)
-		#layout.addWidget(self.cb)
+		layout.addWidget(self.cb)
 		self.setLayout(layout)
 		self.initUI()
 
