@@ -12,12 +12,7 @@ class Tile():
 		else:
 			self.open = False
 		self.explored = False
-		self.active = False
-	def activate(self):
-		self.active = True
-		self.explored = True
-	def deactivate(self):
-		self.active = False
+		self.final = False
 
 def FormatInfo(raw):
 	info = raw.pop(0)
@@ -115,9 +110,20 @@ class window(QWidget):
 		for y in range(0, len(self.tiles[self.iMap])):
 			for x in range(0, len(self.tiles[self.iMap][0])):
 				if self.tiles[self.iMap][y][x].open:
-					qp.setBrush(QColor(200, 0, 0, 0))
+					a = 200
+					b = 0
+					c = 0
+					d = 0
 				else:
-					qp.setBrush(QColor(25, 80, 90, 200))
+					a = 25
+					b = 80
+					c = 90
+					d = 200
+				if self.tiles[self.iMap][y][x].final:
+					d = 200
+				elif self.tiles[self.iMap][y][x].explored:
+					d = 100
+				qp.setBrush(QColor(a, b, c, d))
 				qp.drawRect(x * self.sizeDraw, y * self.sizeDraw, self.sizeDraw, self.sizeDraw)
 
 if __name__ == "__main__":
