@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 from fractions import gcd
 from PyQt4.QtCore import *
