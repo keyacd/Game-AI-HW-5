@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import a_star
 from fractions import gcd
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -88,9 +89,23 @@ class window(QWidget):
 		layout.addWidget(self.cb)
 		self.setLayout(layout)
 		self.initUI()
+	
+	def getTiles(self):
+		return self.tiles[self.iMap]
+		
+	def markExplored(self, pos):
+		self.tiles[self.iMap][pos[1]][pos[0]].explored = True
+		self.tiles[self.iMap][pos[1]][pos[0]].final = False
+		self.update()
+		
+	def markFinal(self, pos):
+		self.tiles[self.iMap][pos[1]][pos[0]].explored = False
+		self.tiles[self.iMap][pos[1]][pos[0]].final = True
+		self.update()
 
 	def comboChange(self,i):
 		self.iMap = i
+		self.update()
         
 	def initUI(self):      
 		self.setWindowState(Qt.WindowMaximized)
