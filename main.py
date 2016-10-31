@@ -1,13 +1,9 @@
-#!/usr/bin/env python3
 import sys
 import time
 from a_star import a_star_pathfind
 from TileGraph import TileGraph
-# import MainWindow
 from fractions import gcd
 from PyQt4 import QtCore, QtGui
-# from PyQt4.QtCore import *
-# from PyQt4.QtGui import *
 
 class Tile():
 	def __init__(self, size, tile):
@@ -25,8 +21,6 @@ def FormatInfo(raw):
 	info = info.split(" ")
 	info = info[1]
 	return info
-	
-
 
 def MakeTiles(filename, size):
 	# Open the file & read in the data
@@ -90,12 +84,14 @@ class mapView(QtGui.QWidget):
 		self.maps = ["arena2", "hrt201n"]
 		self.tiles = []
 		for m in self.maps:
-			new = MakeTiles(m, self.size)
 			self.tiles.append(MakeTiles(m, self.size))
 		self.iMap = 0
-		# layout = QtGui.QHBoxLayout()
-		# self.setLayout(layout)
+		self.tilesWaypoints = []
+		for m in self.maps:
+			self.tilesWaypoints.append(MakeTiles(m, 1))
+		self.mode = True
 		self.initUI()
+	
 	def mousePressEvent(self, event):
 		x = event.x() // self.sizeDraw
 		y = event.y() // self.sizeDraw
@@ -109,8 +105,11 @@ class mapView(QtGui.QWidget):
 				self.tiles[self.iMap][y][x].explored = True
 				self.setEnd = False
 			self.update()
-		# print("({}, {}) -> ({}, {})".format(event.x(), event.y(), x, y))
 			
+	def changeMode(self):
+		self.mode = not self.mode
+		self.update()
+
 	def getTiles(self):
 		return self.tiles[self.iMap]
 		
@@ -124,6 +123,7 @@ class mapView(QtGui.QWidget):
 			self.tiles[self.iMap][pos[1]][pos[0]].explored = False
 			self.tiles[self.iMap][pos[1]][pos[0]].final = True
 		self.update()
+	
 	def reset_state(self):
 		for row in self.tiles[self.iMap]:
 			for elem in row:
@@ -141,10 +141,7 @@ class mapView(QtGui.QWidget):
 				self.markExplored(pos)
 			else:
 				self.markFinal(pos)
-			# time.sleep(0.1)
-			# self.repaint()
 			app.processEvents()
-			# app.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
 			if i % 5 == 0:
 				app.processEvents()
 				i = 0
@@ -157,7 +154,6 @@ class mapView(QtGui.QWidget):
         
 	def initUI(self):      
 		self.setWindowState(QtCore.Qt.WindowMaximized)
-		self.setWindowTitle('Tile Size: ' + str(self.size) + ", Map: " + self.maps[self.iMap] + " " + str(len(self.tiles[0][0])) + "x" + str(len(self.tiles[0])))
 		self.show()
 
 	def paintEvent(self, e):
@@ -171,22 +167,27 @@ class mapView(QtGui.QWidget):
 		color.setNamedColor('#d4d4d4')
 		qp.setPen(color)
 
-		for y in range(0, len(self.tiles[self.iMap])):
-			for x in range(0, len(self.tiles[self.iMap][0])):
-				if self.tiles[self.iMap][y][x].open:
+		if self.mode:
+			self.tileSet = self.tiles
+		else:
+			self.tileSet = self.tilesWaypoints
+
+		for y in range(0, len(self.tileSet[self.iMap])):
+			for x in range(0, len(self.tileSet[self.iMap][0])):
+				if self.tileSet[self.iMap][y][x].open:
 					a = 200
 					b = 0
 					c = 0
 					d = 0
+					if self.tileSet[self.iMap][y][x].final:
+						d = 200
+					elif self.tileSet[self.iMap][y][x].explored:
+						d = 100
 				else:
 					a = 25
 					b = 80
 					c = 90
 					d = 200
-				if self.tiles[self.iMap][y][x].final:
-					d = 200
-				elif self.tiles[self.iMap][y][x].explored:
-					d = 100
 				qp.setBrush(QtGui.QColor(a, b, c, d))
 				qp.drawRect(x * self.sizeDraw, y * self.sizeDraw, self.sizeDraw, self.sizeDraw)
 try:
@@ -204,52 +205,55 @@ except AttributeError:
         return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(800, 600)
-        self.centralwidget = QtGui.QWidget(MainWindow)
-        self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
-        self.mapBox = QtGui.QComboBox(self.centralwidget)
-        self.mapBox.setGeometry(QtCore.QRect(0, 0, 221, 26))
-        self.mapBox.setObjectName(_fromUtf8("mapBox"))
-        self.findPathButton = QtGui.QPushButton(self.centralwidget)
-        self.findPathButton.setGeometry(QtCore.QRect(220, 0, 110, 32))
-        self.findPathButton.setObjectName(_fromUtf8("findPathButton"))
-        self.widget = mapView(self.centralwidget)
-        self.widget.setGeometry(QtCore.QRect(0, 30, 791, 521))
-        self.widget.setObjectName(_fromUtf8("widget"))
-        self.waypointModeButton = QtGui.QPushButton(self.centralwidget)
-        self.waypointModeButton.setGeometry(QtCore.QRect(330, 0, 141, 32))
-        self.waypointModeButton.setObjectName(_fromUtf8("waypointModeButton"))
-        self.resetButton = QtGui.QPushButton(self.centralwidget)
-        self.resetButton.setGeometry(QtCore.QRect(471, 0, 110, 32))
-        self.resetButton.setObjectName(_fromUtf8("resetButton"))
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
-        self.menubar.setObjectName(_fromUtf8("menubar"))
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtGui.QStatusBar(MainWindow)
-        self.statusbar.setObjectName(_fromUtf8("statusbar"))
-        MainWindow.setStatusBar(self.statusbar)
+	def setupUi(self, MainWindow):
+		MainWindow.setObjectName(_fromUtf8("MainWindow"))
+		MainWindow.resize(800, 600)
+		self.centralwidget = QtGui.QWidget(MainWindow)
+		self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
+		self.mapBox = QtGui.QComboBox(self.centralwidget)
+		self.mapBox.setGeometry(QtCore.QRect(0, 0, 221, 26))
+		self.mapBox.setObjectName(_fromUtf8("mapBox"))
+		self.findPathButton = QtGui.QPushButton(self.centralwidget)
+		self.findPathButton.setGeometry(QtCore.QRect(220, 0, 110, 32))
+		self.findPathButton.setObjectName(_fromUtf8("findPathButton"))
+		self.widget = mapView(self.centralwidget)
+		self.widget.setGeometry(QtCore.QRect(0, 30, 791, 521))
+		self.widget.setObjectName(_fromUtf8("widget"))
+		self.waypointModeButton = QtGui.QPushButton(self.centralwidget)
+		self.waypointModeButton.setGeometry(QtCore.QRect(330, 0, 141, 32))
+		self.waypointModeButton.setObjectName(_fromUtf8("waypointModeButton"))
+		self.waypointModeButton.clicked.connect(self.changeMode)
+		self.resetButton = QtGui.QPushButton(self.centralwidget)
+		self.resetButton.setGeometry(QtCore.QRect(471, 0, 110, 32))
+		self.resetButton.setObjectName(_fromUtf8("resetButton"))
+		MainWindow.setCentralWidget(self.centralwidget)
+		self.menubar = QtGui.QMenuBar(MainWindow)
+		self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
+		self.menubar.setObjectName(_fromUtf8("menubar"))
+		MainWindow.setMenuBar(self.menubar)
+		self.statusbar = QtGui.QStatusBar(MainWindow)
+		self.statusbar.setObjectName(_fromUtf8("statusbar"))
+		MainWindow.setStatusBar(self.statusbar)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        
-    def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
-        self.findPathButton.setText(_translate("MainWindow", "Find Path", None))
-        self.waypointModeButton.setText(_translate("MainWindow", "Waypoint Mode", None))
-        self.resetButton.setText(_translate("MainWindow", "Reset", None))
+		self.retranslateUi(MainWindow)
+		QtCore.QMetaObject.connectSlotsByName(MainWindow)
+    
+	def changeWaypointButtonText(self):
+		if self.widget.mode:
+			w = "Waypoint"
+		else:
+			w = "Tile"
+		self.waypointModeButton.setText(_translate("MainWindow", w + " Mode", None))
 
-# def a_star_on_tiles(graph, start, end, map_widget):
-# 	for pos in a_star_pathfind(graph, start, end):
-# 		if type(pos) is not list:
-# 			map_widget.markExplored(pos)
-# 		else:
-# 			map_widget.markFinal(pos)
-# 		time.sleep(0.2)
-	
+	def retranslateUi(self, MainWindow):
+		MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
+		self.findPathButton.setText(_translate("MainWindow", "Find Path", None))
+		self.changeWaypointButtonText()
+		self.resetButton.setText(_translate("MainWindow", "Reset", None))
+
+	def changeMode(self):
+		self.widget.changeMode()
+		self.changeWaypointButtonText()
 	
 if __name__ == "__main__":
 	app = QtGui.QApplication(sys.argv)
@@ -264,7 +268,5 @@ if __name__ == "__main__":
 	ui.resetButton.clicked.connect(ui.widget.reset_state)
 		
 	MainWindow.show()
-	
-	
-	
+		
 	sys.exit(app.exec_())
