@@ -246,7 +246,7 @@ class Ui_MainWindow(object):
 		self.waypointModeButton.setText(_translate("MainWindow", w + " Mode", None))
 
 	def retranslateUi(self, MainWindow):
-		MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
+		MainWindow.setWindowTitle(_translate("MainWindow", "Game AI Homework 5 - Darien Keyack and Nick Colclasure", None))
 		self.findPathButton.setText(_translate("MainWindow", "Find Path", None))
 		self.changeWaypointButtonText()
 		self.resetButton.setText(_translate("MainWindow", "Reset", None))
