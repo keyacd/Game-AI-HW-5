@@ -16,6 +16,14 @@ class Tile():
 		self.explored = False
 		self.final = False
 
+	def markExplored(self):
+		self.explored = True
+		self.final = False
+
+	def markFinal(self):
+		self.explored = False
+		self.final = True
+
 def FormatInfo(raw):
 	info = raw.pop(0)
 	info = info.split(" ")
@@ -95,14 +103,15 @@ class mapView(QtGui.QWidget):
 	def mousePressEvent(self, event):
 		x = event.x() // self.sizeDraw
 		y = event.y() // self.sizeDraw
-		if y < len(self.tiles[self.iMap]) and x < len(self.tiles[self.iMap][0]):
+		tileSet = self.getTileSet()
+		if y < len(tileSet[self.iMap]) and x < len(tileSet[self.iMap][0]):
 			if self.setStart:
 				self.start = (x, y)
-				self.tiles[self.iMap][y][x].explored = True
+				tileSet[self.iMap][y][x].explored = True
 				self.setStart = False
 			elif self.setEnd:
 				self.end = (x, y)
-				self.tiles[self.iMap][y][x].explored = True
+				tileSet[self.iMap][y][x].explored = True
 				self.setEnd = False
 			self.update()
 			
@@ -110,22 +119,29 @@ class mapView(QtGui.QWidget):
 		self.mode = not self.mode
 		self.update()
 
+	def getTileSet(self):
+		if self.mode:
+			tileSet = self.tiles
+		else:
+			tileSet = self.tilesWaypoints
+		return tileSet
+
 	def getTiles(self):
-		return self.tiles[self.iMap]
+		tileSet = self.getTileSet()
+		return tileSet[self.iMap]
 		
 	def markExplored(self, pos):
-		self.tiles[self.iMap][pos[1]][pos[0]].explored = True
-		self.tiles[self.iMap][pos[1]][pos[0]].final = False
+		self.tiles[self.iMap][pos[1]][pos[0]].markExplored()
 		self.update()
 		
 	def markFinal(self, pos_list):
 		for pos in pos_list:
-			self.tiles[self.iMap][pos[1]][pos[0]].explored = False
-			self.tiles[self.iMap][pos[1]][pos[0]].final = True
+			self.tiles[self.iMap][pos[1]][pos[0]].markFinal()
 		self.update()
 	
 	def reset_state(self):
-		for row in self.tiles[self.iMap]:
+		tileSet = self.getTileSet()
+		for row in tileSet[self.iMap]:
 			for elem in row:
 				elem.explored = False
 				elem.final = False
@@ -166,22 +182,18 @@ class mapView(QtGui.QWidget):
 		color = QtGui.QColor(0, 0, 0)
 		color.setNamedColor('#d4d4d4')
 		qp.setPen(color)
+		tileSet = self.getTileSet()
 
-		if self.mode:
-			self.tileSet = self.tiles
-		else:
-			self.tileSet = self.tilesWaypoints
-
-		for y in range(0, len(self.tileSet[self.iMap])):
-			for x in range(0, len(self.tileSet[self.iMap][0])):
-				if self.tileSet[self.iMap][y][x].open:
+		for y in range(0, len(tileSet[self.iMap])):
+			for x in range(0, len(tileSet[self.iMap][0])):
+				if tileSet[self.iMap][y][x].open:
 					a = 200
 					b = 0
 					c = 0
 					d = 0
-					if self.tileSet[self.iMap][y][x].final:
+					if tileSet[self.iMap][y][x].final:
 						d = 200
-					elif self.tileSet[self.iMap][y][x].explored:
+					elif tileSet[self.iMap][y][x].explored:
 						d = 100
 				else:
 					a = 25
