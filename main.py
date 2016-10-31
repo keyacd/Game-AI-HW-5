@@ -118,7 +118,7 @@ class mapView(QtGui.QWidget):
 			
 	def changeMode(self):
 		self.mode = not self.mode
-		# self.reset_size()
+		self.reset_size()
 		self.update()
 
 	def getTileSet(self):
@@ -168,7 +168,7 @@ class mapView(QtGui.QWidget):
 	def comboChange(self,i):
 		self.reset_state()
 		self.iMap = i
-		# self.reset_size()
+		self.reset_size()
 		self.update()
         
 	def initUI(self):      
@@ -177,8 +177,10 @@ class mapView(QtGui.QWidget):
 	
 	def reset_size(self):
 		tileSet = self.getTileSet()
-		self.resize(
-			len(tileSet[self.iMap][0]) * self.sizeDraw, len(tileSet[self.iMap]) * self.sizeDraw)
+		width = len(tileSet[self.iMap][0]) * self.sizeDraw
+		height = len(tileSet[self.iMap]) * self.sizeDraw
+		self.resize(width, height)
+		self.setMinimumSize(width, height)
 
 	def paintEvent(self, e):
 		qp = QtGui.QPainter()
