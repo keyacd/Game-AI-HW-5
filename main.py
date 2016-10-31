@@ -127,9 +127,20 @@ class mapView(QtGui.QWidget):
 		self.tilesWaypoints = []
 		for m in self.maps:
 			self.tilesWaypoints.append(MakeTiles(m, 1))
+		self.waypoints = [[], []]
+		self.addWaypoints(0, [96, 113, 130], [8, 42, 56, 72, 88, 105, 121, 137, 153])
+		self.waypoints[0].append((130, 25))
+		self.addWaypoints(0, [146, 162], [42, 56, 72, 88, 105, 121, 137, 153])
+		self.addWaypoints(0, [80, 177], [56, 72, 88, 105, 121, 137, 153])
+		self.addWaypoints(0, [194], [72, 88, 105, 121, 137])
 		self.mode = True
 		self.initUI()
 	
+	def addWaypoints(self, i, x, y):
+		for n in x:
+			for m in y:
+				self.waypoints[i].append((n, m))
+
 	def mousePressEvent(self, event):
 		x = event.x() // self.sizeDraw
 		y = event.y() // self.sizeDraw
@@ -144,6 +155,7 @@ class mapView(QtGui.QWidget):
 				tileSet[self.iMap][y][x].explored = True
 				self.setEnd = False
 			self.update()
+		print(x, y)
 			
 	def changeMode(self):
 		self.mode = not self.mode
@@ -239,6 +251,11 @@ class mapView(QtGui.QWidget):
 					b = 80
 					c = 90
 					d = 200
+				if not self.mode and (x, y) in self.waypoints[self.iMap]:
+					a = 0
+					b = 200
+					c = 200
+					d = 150
 				qp.setBrush(QtGui.QColor(a, b, c, d))
 				qp.drawRect(x * self.sizeDraw, y * self.sizeDraw, self.sizeDraw, self.sizeDraw)
 try:
@@ -285,10 +302,12 @@ class Ui_MainWindow(object):
 		self.selectedPoints.setGeometry(QtCore.QRect(600, 0, 110, 32))
 		self.selectedPoints.setObjectName(_fromUtf8("selectedPoints"))
 		MainWindow.setCentralWidget(self.centralwidget)
+		
 		self.menubar = QtGui.QMenuBar(MainWindow)
 		self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
 		self.menubar.setObjectName(_fromUtf8("menubar"))
 		MainWindow.setMenuBar(self.menubar)
+		
 		self.statusbar = QtGui.QStatusBar(MainWindow)
 		self.statusbar.setObjectName(_fromUtf8("statusbar"))
 		MainWindow.setStatusBar(self.statusbar)
