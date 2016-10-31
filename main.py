@@ -262,6 +262,7 @@ class Ui_MainWindow(object):
 		self.statusbar = QtGui.QStatusBar(MainWindow)
 		self.statusbar.setObjectName(_fromUtf8("statusbar"))
 		MainWindow.setStatusBar(self.statusbar)
+		#self.selectedPoints = selectedPointsDisplay()
 
 		self.retranslateUi(MainWindow)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
