@@ -124,18 +124,34 @@ class mapView(QtGui.QWidget):
 			self.tiles[self.iMap][pos[1]][pos[0]].explored = False
 			self.tiles[self.iMap][pos[1]][pos[0]].final = True
 		self.update()
-	
+	def reset_state(self):
+		for row in self.tiles[self.iMap]:
+			for elem in row:
+				elem.explored = False
+				elem.final = False
+		self.setStart = True
+		self.setEnd = True
+		self.update()
+
 	def a_star_on_tiles(self):
 		tiled_graph = TileGraph(self.getTiles())
+		i = 0
 		for pos in a_star_pathfind(tiled_graph, self.start, self.end):
 			if type(pos) is not list:
 				self.markExplored(pos)
 			else:
 				self.markFinal(pos)
-			# time.sleep(0.01)
+			# time.sleep(0.1)
+			# self.repaint()
 			app.processEvents()
+			# app.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+			if i % 5 == 0:
+				app.processEvents()
+				i = 0
+			i += 1
 
 	def comboChange(self,i):
+		self.reset_state()
 		self.iMap = i
 		self.update()
         
@@ -205,6 +221,9 @@ class Ui_MainWindow(object):
         self.waypointModeButton = QtGui.QPushButton(self.centralwidget)
         self.waypointModeButton.setGeometry(QtCore.QRect(330, 0, 141, 32))
         self.waypointModeButton.setObjectName(_fromUtf8("waypointModeButton"))
+        self.resetButton = QtGui.QPushButton(self.centralwidget)
+        self.resetButton.setGeometry(QtCore.QRect(471, 0, 110, 32))
+        self.resetButton.setObjectName(_fromUtf8("resetButton"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
@@ -221,6 +240,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
         self.findPathButton.setText(_translate("MainWindow", "Find Path", None))
         self.waypointModeButton.setText(_translate("MainWindow", "Waypoint Mode", None))
+        self.resetButton.setText(_translate("MainWindow", "Reset", None))
 
 # def a_star_on_tiles(graph, start, end, map_widget):
 # 	for pos in a_star_pathfind(graph, start, end):
@@ -241,6 +261,7 @@ if __name__ == "__main__":
 	
 	ui.widget.app = app
 	ui.findPathButton.clicked.connect(ui.widget.a_star_on_tiles)
+	ui.resetButton.clicked.connect(ui.widget.reset_state)
 		
 	MainWindow.show()
 	
