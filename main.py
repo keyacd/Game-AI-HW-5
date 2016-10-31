@@ -118,6 +118,7 @@ class mapView(QtGui.QWidget):
 			
 	def changeMode(self):
 		self.mode = not self.mode
+		# self.reset_size()
 		self.update()
 
 	def getTileSet(self):
@@ -167,11 +168,17 @@ class mapView(QtGui.QWidget):
 	def comboChange(self,i):
 		self.reset_state()
 		self.iMap = i
+		# self.reset_size()
 		self.update()
         
 	def initUI(self):      
 		self.setWindowState(QtCore.Qt.WindowMaximized)
 		self.show()
+	
+	def reset_size(self):
+		tileSet = self.getTileSet()
+		self.resize(
+			len(tileSet[self.iMap][0]) * self.sizeDraw, len(tileSet[self.iMap]) * self.sizeDraw)
 
 	def paintEvent(self, e):
 		qp = QtGui.QPainter()
@@ -229,9 +236,17 @@ class Ui_MainWindow(object):
 		self.findPathButton = QtGui.QPushButton(self.centralwidget)
 		self.findPathButton.setGeometry(QtCore.QRect(220, 0, 110, 32))
 		self.findPathButton.setObjectName(_fromUtf8("findPathButton"))
-		self.widget = mapView(self.centralwidget)
-		self.widget.setGeometry(QtCore.QRect(0, 30, 791, 521))
+		self.scrollArea = QtGui.QScrollArea(self.centralwidget)
+		self.scrollArea.setGeometry(QtCore.QRect(9, 29, 771, 531))
+		self.scrollArea.setWidgetResizable(True)
+		self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
+		self.widget = mapView()
+		# self.widget.setGeometry(QtCore.QRect(0, 0, 769, 529))
 		self.widget.setObjectName(_fromUtf8("widget"))
+		self.scrollArea.setWidget(self.widget)
+		# self.widget = mapView(self.centralwidget)
+		# self.widget.setGeometry(QtCore.QRect(0, 30, 791, 521))
+		# self.widget.setObjectName(_fromUtf8("widget"))
 		self.waypointModeButton = QtGui.QPushButton(self.centralwidget)
 		self.waypointModeButton.setGeometry(QtCore.QRect(330, 0, 141, 32))
 		self.waypointModeButton.setObjectName(_fromUtf8("waypointModeButton"))
