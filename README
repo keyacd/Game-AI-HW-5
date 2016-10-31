@@ -1,0 +1,18 @@
+Game AI Homework 5
+Darien Keyack and Nick Colclasure
+
+Files:
+__init__.py
+a_star.py
+arena2.map - provided map
+Graph_prototype.py
+homework5 part I-- Pathfinding.docx - homework instructions
+hrt201n.map - provided map
+main.py
+map.py
+test.map, testBigger.map, testLetters.map - maps used for testing
+TileGraph.py
+
+How to Run:
+
+Major Functions:
