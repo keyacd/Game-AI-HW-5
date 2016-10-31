@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 import time
 from a_star import a_star_pathfind
