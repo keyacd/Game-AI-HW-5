@@ -80,6 +80,35 @@ def MakeTiles(filename, size):
 		tiles.append(row)
 	return tiles
 
+class selectedPointsDisplay(QtGui.QLabel):
+	def __init__(self, parent = None):
+		super(selectedPointsDisplay, self).__init__("Selected: ", parent)
+		self.a = None
+		self.b = None
+		self.updateText()
+
+	def addPoint(self, x, y):
+		if self.a == None:
+		    self.a = (x, y)
+		else:
+		    self.b = (x, y)
+		self.updateText()
+
+	def reset(self):
+		self.a = None
+		self.b = None
+		self.updateText()
+
+	def updateText(self):
+		t = "Selected: "
+		if self.a == None:
+		    t += "None"
+		else:
+		    t += string(self.a)
+		    if self.b == None:
+		        t += ", " + string(self.b)
+		self.setText(t)
+
 class mapView(QtGui.QWidget):
 	def __init__(self, parent = None):
 		super(mapView, self).__init__(parent)
@@ -243,12 +272,8 @@ class Ui_MainWindow(object):
 		self.scrollArea.setWidgetResizable(True)
 		self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
 		self.widget = mapView()
-		# self.widget.setGeometry(QtCore.QRect(0, 0, 769, 529))
 		self.widget.setObjectName(_fromUtf8("widget"))
 		self.scrollArea.setWidget(self.widget)
-		# self.widget = mapView(self.centralwidget)
-		# self.widget.setGeometry(QtCore.QRect(0, 30, 791, 521))
-		# self.widget.setObjectName(_fromUtf8("widget"))
 		self.waypointModeButton = QtGui.QPushButton(self.centralwidget)
 		self.waypointModeButton.setGeometry(QtCore.QRect(330, 0, 141, 32))
 		self.waypointModeButton.setObjectName(_fromUtf8("waypointModeButton"))
@@ -256,6 +281,9 @@ class Ui_MainWindow(object):
 		self.resetButton = QtGui.QPushButton(self.centralwidget)
 		self.resetButton.setGeometry(QtCore.QRect(471, 0, 110, 32))
 		self.resetButton.setObjectName(_fromUtf8("resetButton"))
+		self.selectedPoints = selectedPointsDisplay(self.centralwidget)
+		self.selectedPoints.setGeometry(QtCore.QRect(600, 0, 110, 32))
+		self.selectedPoints.setObjectName(_fromUtf8("selectedPoints"))
 		MainWindow.setCentralWidget(self.centralwidget)
 		self.menubar = QtGui.QMenuBar(MainWindow)
 		self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
@@ -264,7 +292,6 @@ class Ui_MainWindow(object):
 		self.statusbar = QtGui.QStatusBar(MainWindow)
 		self.statusbar.setObjectName(_fromUtf8("statusbar"))
 		MainWindow.setStatusBar(self.statusbar)
-		#self.selectedPoints = selectedPointsDisplay()
 
 		self.retranslateUi(MainWindow)
 		QtCore.QMetaObject.connectSlotsByName(MainWindow)
