@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import a_star
+import MainWindow
 from fractions import gcd
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -71,9 +72,9 @@ def MakeTiles(filename, size):
 		tiles.append(row)
 	return tiles
 
-class window(QWidget):
+class mapView(QWidget):
 	def __init__(self):
-		super(window, self).__init__()
+		super(mapView, self).__init__()
 		self.size = 2
 		self.sizeDraw = 5
 		self.maps = ["arena2", "hrt201n"]
@@ -88,7 +89,7 @@ class window(QWidget):
 		self.cb.currentIndexChanged.connect(self.comboChange)
 		layout.addWidget(self.cb)
 		self.setLayout(layout)
-		self.initUI()
+		# self.initUI()
 	
 	def getTiles(self):
 		return self.tiles[self.iMap]
@@ -144,5 +145,7 @@ class window(QWidget):
 
 if __name__ == "__main__":
 	app = QApplication(sys.argv)
+	main_app = MainWindow()
+	main_app.
 	ex = window()
 	sys.exit(app.exec_())

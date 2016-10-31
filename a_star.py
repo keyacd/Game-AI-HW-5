@@ -14,15 +14,17 @@ def a_star_pathfind(graph, start, end):
 	def get_lowest_fScore(scores):
 		lowest = None
 		lowest_val = float("inf")
-		for key, val in scores.items():
+		for pos in openSet:
+			key = pos
+			val = scores[key]
 			if val < lowest_val:
 				lowest = key
 				lowest_val = val
-		return lowest, lowest_val
+		return lowest
 	def reconstruct_path(cameFrom, end):
 		path = [end]
 		cur = end
-		while cameFrom[cur] != None:
+		while cur in cameFrom:
 			cur = cameFrom[cur]
 			path.append(cur)
 		path.reverse()
@@ -30,24 +32,24 @@ def a_star_pathfind(graph, start, end):
 	
 	while len(openSet) > 0:
 		current = get_lowest_fScore(fScore)
-		neighbors = getAdjacentOpen()
+		neighbors = graph.getAdjacent(current)
 		
 		openSet.remove(current)
 		closedSet.add(current)
-		if current == goal:
+		if current == end:
 			yield reconstruct_path(cameFrom, current)
 			return
+		yield current
 		
 		for neighbor in neighbors:
 			if neighbor in closedSet:
 				continue
-			tentative_g_score = gScore[current] + graph.getEdgeCost(current, n)
+			tentative_g_score = gScore[current] + graph.getEdgeCost(current, neighbor)
 			if neighbor not in openSet:
 				openSet.add(neighbor)
-				yield neighbor
 			elif tentative_g_score >= gScore[neighbor]:
 				continue
 			
 			cameFrom[neighbor] = current
 			gScore[neighbor] = tentative_g_score
-			fScore[neighbor] = gScore[neighbor] + graph.getHeuristicDist(neighbor, goal)
+			fScore[neighbor] = gScore[neighbor] + graph.getHeuristicDist(neighbor, end)
