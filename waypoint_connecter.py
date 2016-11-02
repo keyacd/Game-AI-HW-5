@@ -144,7 +144,7 @@ class mapView(QtGui.QWidget):
 		for i in range(0, len(self.maps)):
 			self.waypoints.append(GetWaypoints(i))
 		self.gen_connections(self.tilesWaypoints[0], self.waypoints[0], 25)
-		self.gen_connections(self.tilesWaypoints[1], self.waypoints[1], 50)
+		self.gen_connections(self.tilesWaypoints[1], self.waypoints[1], 25)
 
 		# 25 good dist?
 		# self.waypoints[self.iMap][(96, 8)].append((113, 8))
@@ -252,6 +252,10 @@ class mapView(QtGui.QWidget):
 				elem.final = False
 		self.setStart = True
 		self.setEnd = True
+		self.update()
+		filePickle = open("waypoints_" + str(self.iMap), "wb")
+		pickle.dump(self.waypoints[self.iMap], filePickle)
+		filePickle.close()
 		self.update()
 
 	def a_star_on_tiles(self):
