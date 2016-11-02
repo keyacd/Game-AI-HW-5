@@ -2,8 +2,10 @@
 import sys
 import time
 import pickle
+import math
 from a_star import a_star_pathfind
 from TileGraph import TileGraph
+from WaypointGraph import WaypointGraph
 from fractions import gcd
 from PyQt4 import QtCore, QtGui
 
@@ -142,6 +144,8 @@ class mapView(QtGui.QWidget):
 		self.waypoints = []
 		for i in range(0, len(self.maps)):
 			self.waypoints.append(GetWaypoints(i))
+		self.explored_waypoints = []
+		self.final_waypoints = []
 		# 25 good dist?
 		# self.waypoints[self.iMap][(96, 8)].append((113, 8))
 		# self.waypoints[self.iMap][(113, 8)].append((96, 8))
@@ -153,17 +157,37 @@ class mapView(QtGui.QWidget):
 		y = event.y() // self.sizeDraw
 		tileSet = self.getTileSet()
 		if y < len(tileSet[self.iMap]) and x < len(tileSet[self.iMap][0]):
-			if self.setStart:
-				self.start = (x, y)
-				tileSet[self.iMap][y][x].explored = True
-				self.setStart = False
-			elif self.setEnd:
-				self.end = (x, y)
-				tileSet[self.iMap][y][x].explored = True
-				self.setEnd = False
+			if (self.mode):
+				if self.setStart:
+					self.start = (x, y)
+					tileSet[self.iMap][y][x].explored = True
+					self.setStart = False
+				elif self.setEnd:
+					self.end = (x, y)
+					tileSet[self.iMap][y][x].explored = True
+					self.setEnd = False
+			else:
+				point = self.getNearestWaypoint((x, y))
+				print("Waypoint: {}, {}".format(point[0], point[1]))
+				if self.setStart:
+					self.start = point
+					self.setStart = False
+				elif self.setEnd:
+					self.end = point
+					self.setEnd = False
 			self.update()
-		#print(str(x) + "," + str(y))
 			
+		#print(str(x) + "," + str(y))
+	def getNearestWaypoint(self, pos):
+		def dist(p0, p1):
+			return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
+		nearest = None
+		nearest_dist = float("inf")
+		for point in self.waypoints[self.iMap]:
+			if dist(point, pos) < nearest_dist:
+				nearest = point
+				nearest_dist = dist(point, pos)
+		return nearest
 	def changeMode(self):
 		self.mode = not self.mode
 		self.reset_size()
@@ -198,7 +222,14 @@ class mapView(QtGui.QWidget):
 		self.setStart = True
 		self.setEnd = True
 		self.update()
+		
+	def a_star(self):
+		if self.mode:
+			self.a_star_on_tiles()
+		else:
+			self.a_star_on_waypoints()
 
+	
 	def a_star_on_tiles(self):
 		tiled_graph = TileGraph(self.getTiles())
 		i = 0
@@ -212,6 +243,20 @@ class mapView(QtGui.QWidget):
 				app.processEvents()
 				i = 0
 			i += 1
+	def a_star_on_waypoints(self):
+		self.explored_waypoints = []
+		self.final_waypoints = []
+		waypoint_graph = WaypointGraph(self.waypoints[self.iMap])
+		i = 0
+		for pos in a_star_pathfind(waypoint_graph, self.start, self.end):
+			if type(pos) is not list:
+				self.explored_waypoints.append(pos)
+			else:
+				self.final_waypoints = pos
+			# print(self.explored_waypoints)
+			self.repaint()
+			app.processEvents()
+
 
 	def comboChange(self,i):
 		self.reset_state()
@@ -239,7 +284,7 @@ class mapView(QtGui.QWidget):
 		qp.end()
 	
 	def drawLines(self, qp):
-		pen = QtGui.QPen(QtCore.Qt.blue, 2, QtCore.Qt.SolidLine)
+		pen = QtGui.QPen(QtCore.Qt.red, 2, QtCore.Qt.SolidLine)
 		visited = []
 		drawn = []
 		to_visit = list(self.waypoints[self.iMap].keys())
@@ -254,6 +299,16 @@ class mapView(QtGui.QWidget):
 				if (cur, adj) in drawn or (adj, cur) in drawn:
 					continue
 				else:
+					# if len(self.explored_waypoints) > 0:
+					# 	print ("cur: {}, {}; adj: {}, {};")
+					if cur in self.final_waypoints and adj in self.final_waypoints:
+						pen.setColor(QtGui.QColor(200, 0, 0, 200))
+					elif cur in self.explored_waypoints and adj in self.explored_waypoints:
+						# pen.setColor(QtGui.QColor(200, 0, 0, 100))
+						pen.setColor(QtCore.Qt.red)
+					else:
+						pen.setColor(QtCore.Qt.blue)
+					qp.setPen(pen)
 					half_size = self.sizeDraw / 2
 					qp.drawLine(
 						cur[0] * self.sizeDraw + half_size,
@@ -375,7 +430,7 @@ if __name__ == "__main__":
 	ui.mapBox.currentIndexChanged.connect(ui.widget.comboChange)
 	
 	ui.widget.app = app
-	ui.findPathButton.clicked.connect(ui.widget.a_star_on_tiles)
+	ui.findPathButton.clicked.connect(ui.widget.a_star)
 	ui.resetButton.clicked.connect(ui.widget.reset_state)
 		
 	MainWindow.show()
