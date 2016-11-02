@@ -83,13 +83,15 @@ def MakeTiles(filename, size):
 def GetWaypoints(n):
 	mapFile = open("waypoints_" + str(n) + ".txt", "r")
 	waypoints = list(mapFile)
+	ret = {}
 	mapFile.close()
 	for i in range(0, len(waypoints)):
 		waypoints[i] = waypoints[i].replace("\n", "").split(",")
 		waypoints[i] = (int(waypoints[i][0]), int(waypoints[i][1]))
+		ret[waypoints[i]] = []
 		# waypoints[i][0] = int(waypoints[i][0])
 		# waypoints[i][1] = int(waypoints[i][1])
-	return waypoints
+	return ret
 
 class selectedPointsDisplay(QtGui.QLabel):
 	def __init__(self, parent = None):
@@ -141,6 +143,9 @@ class mapView(QtGui.QWidget):
 		self.waypoints = []
 		for i in range(0, len(self.maps)):
 			self.waypoints.append(GetWaypoints(i))
+		# 25 good dist?
+		# self.waypoints[self.iMap][(96, 8)].append((113, 8))
+		# self.waypoints[self.iMap][(113, 8)].append((96, 8))
 		self.mode = True
 		self.initUI()
 	
@@ -235,7 +240,34 @@ class mapView(QtGui.QWidget):
 		qp = QtGui.QPainter()
 		qp.begin(self)
 		self.drawRectangles(qp)
+		if not self.mode:
+			self.drawLines(qp)
 		qp.end()
+	
+	def drawLines(self, qp):
+		pen = QtGui.QPen(QtCore.Qt.blue, 2, QtCore.Qt.SolidLine)
+		visited = []
+		drawn = []
+		to_visit = list(self.waypoints[self.iMap].keys())
+		qp.setPen(pen)
+		while len(to_visit) > 0:
+			cur = to_visit[0]
+			to_visit.remove(cur)
+			if cur in visited:
+				continue
+			visited.append(cur)
+			for adj in self.waypoints[self.iMap][cur]:
+				if (cur, adj) in drawn or (adj, cur) in drawn:
+					continue
+				else:
+					half_size = self.sizeDraw / 2
+					qp.drawLine(
+						cur[0] * self.sizeDraw + half_size,
+						cur[1] * self.sizeDraw + half_size,
+						adj[0] * self.sizeDraw + half_size,
+						adj[1] * self.sizeDraw + half_size)
+			
+		
 	    
 	def drawRectangles(self, qp):  
 		color = QtGui.QColor(0, 0, 0)
