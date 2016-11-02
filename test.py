@@ -143,7 +143,7 @@ class mapView(QtGui.QWidget):
 		self.waypoints = []
 		for i in range(0, len(self.maps)):
 			self.waypoints.append(GetWaypoints(i))
-		self.mode = False
+		self.mode = True
 		self.initUI()
 
 	def mousePressEvent(self, event):
