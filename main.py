@@ -80,6 +80,16 @@ def MakeTiles(filename, size):
 		tiles.append(row)
 	return tiles
 
+def GetWaypoints(n):
+	mapFile = open("waypoints_" + str(n) + ".txt", "r")
+	waypoints = list(mapFile)
+	mapFile.close()
+	for i in range(0, len(waypoints)):
+		waypoints[i] = waypoints[i].replace("\n", "").split(",")
+		waypoints[i][0] = int(waypoints[i][0])
+		waypoints[i][1] = int(waypoints[i][1])
+	return waypoints
+
 class selectedPointsDisplay(QtGui.QLabel):
 	def __init__(self, parent = None):
 		super(selectedPointsDisplay, self).__init__("Selected: ", parent)
@@ -127,12 +137,9 @@ class mapView(QtGui.QWidget):
 		self.tilesWaypoints = []
 		for m in self.maps:
 			self.tilesWaypoints.append(MakeTiles(m, 1))
-		self.waypoints = [[], []]
-		self.addWaypoints(0, [96, 113, 130], [8, 42, 56, 72, 88, 105, 121, 137, 153])
-		self.waypoints[0].append((130, 25))
-		self.addWaypoints(0, [146, 162], [42, 56, 72, 88, 105, 121, 137, 153])
-		self.addWaypoints(0, [80, 177], [56, 72, 88, 105, 121, 137, 153])
-		self.addWaypoints(0, [194], [72, 88, 105, 121, 137])
+		self.waypoints = []
+		for i in range(0, len(self.maps)):
+			self.waypoints.append(GetWaypoints(i))
 		self.mode = True
 		self.initUI()
 	
@@ -155,7 +162,7 @@ class mapView(QtGui.QWidget):
 				tileSet[self.iMap][y][x].explored = True
 				self.setEnd = False
 			self.update()
-		print(x, y)
+		print(str(x) + "," + str(y))
 			
 	def changeMode(self):
 		self.mode = not self.mode
@@ -251,7 +258,7 @@ class mapView(QtGui.QWidget):
 					b = 80
 					c = 90
 					d = 200
-				if not self.mode and (x, y) in self.waypoints[self.iMap]:
+				if not self.mode and [x, y] in self.waypoints[self.iMap]:
 					a = 0
 					b = 200
 					c = 200
