@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import time
+import pickle
 from a_star import a_star_pathfind
 from TileGraph import TileGraph
 from fractions import gcd
@@ -81,17 +82,15 @@ def MakeTiles(filename, size):
 	return tiles
 
 def GetWaypoints(n):
-	mapFile = open("waypoints_" + str(n) + ".txt", "r")
-	waypoints = list(mapFile)
-	ret = {}
-	mapFile.close()
-	for i in range(0, len(waypoints)):
-		waypoints[i] = waypoints[i].replace("\n", "").split(",")
-		waypoints[i] = (int(waypoints[i][0]), int(waypoints[i][1]))
-		ret[waypoints[i]] = []
-		# waypoints[i][0] = int(waypoints[i][0])
-		# waypoints[i][1] = int(waypoints[i][1])
-	return ret
+	pickleFile = open("waypoints_" + str(n), "rb")
+	waypoints = pickle.load(pickleFile)
+	pickleFile.close()
+	if type(waypoints) == list:
+		old = waypoints
+		waypoints = {}
+		for i in old:
+			waypoints[i] = []
+	return waypoints
 
 class selectedPointsDisplay(QtGui.QLabel):
 	def __init__(self, parent = None):
@@ -163,7 +162,7 @@ class mapView(QtGui.QWidget):
 				tileSet[self.iMap][y][x].explored = True
 				self.setEnd = False
 			self.update()
-		print(str(x) + "," + str(y))
+		#print(str(x) + "," + str(y))
 			
 	def changeMode(self):
 		self.mode = not self.mode
