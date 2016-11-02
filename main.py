@@ -86,8 +86,9 @@ def GetWaypoints(n):
 	mapFile.close()
 	for i in range(0, len(waypoints)):
 		waypoints[i] = waypoints[i].replace("\n", "").split(",")
-		waypoints[i][0] = int(waypoints[i][0])
-		waypoints[i][1] = int(waypoints[i][1])
+		waypoints[i] = (int(waypoints[i][0]), int(waypoints[i][1]))
+		# waypoints[i][0] = int(waypoints[i][0])
+		# waypoints[i][1] = int(waypoints[i][1])
 	return waypoints
 
 class selectedPointsDisplay(QtGui.QLabel):
@@ -258,7 +259,7 @@ class mapView(QtGui.QWidget):
 					b = 80
 					c = 90
 					d = 200
-				if not self.mode and [x, y] in self.waypoints[self.iMap]:
+				if not self.mode and (x, y) in self.waypoints[self.iMap]:
 					a = 0
 					b = 200
 					c = 200
