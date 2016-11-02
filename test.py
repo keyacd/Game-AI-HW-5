@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import time
+import pickle
 from a_star import a_star_pathfind
 from TileGraph import TileGraph
 from fractions import gcd
@@ -81,17 +82,16 @@ def MakeTiles(filename, size):
 	return tiles
 
 def GetWaypoints(n):
-	mapFile = open("waypoints_" + str(n) + ".txt", "r")
-	waypoints = list(mapFile)
-	ret = {}
-	mapFile.close()
-	for i in range(0, len(waypoints)):
-		waypoints[i] = waypoints[i].replace("\n", "").split(",")
-		waypoints[i] = (int(waypoints[i][0]), int(waypoints[i][1]))
-		ret[waypoints[i]] = []
-		# waypoints[i][0] = int(waypoints[i][0])
-		# waypoints[i][1] = int(waypoints[i][1])
-	return ret
+	#mapFile = open("waypoints_" + str(n) + ".txt", "r")
+	pickleFile = open("waypoints_" + str(n), "rb")
+	#waypoints = list(mapFile)
+	waypoints = pickle.load(pickleFile)
+	#mapFile.close()
+	pickleFile.close()
+	#for i in range(0, len(waypoints)):
+	#	waypoints[i] = waypoints[i].replace("\n", "").split(",")
+	#	waypoints[i] = (int(waypoints[i][0]), int(waypoints[i][1]))
+	return waypoints
 
 class selectedPointsDisplay(QtGui.QLabel):
 	def __init__(self, parent = None):
@@ -136,17 +136,14 @@ class mapView(QtGui.QWidget):
 		self.tiles = []
 		for m in self.maps:
 			self.tiles.append(MakeTiles(m, self.size))
-		self.iMap = 0
+		self.iMap = 1
 		self.tilesWaypoints = []
 		for m in self.maps:
 			self.tilesWaypoints.append(MakeTiles(m, 1))
 		self.waypoints = []
 		for i in range(0, len(self.maps)):
 			self.waypoints.append(GetWaypoints(i))
-		# 25 good dist?
-		# self.waypoints[self.iMap][(96, 8)].append((113, 8))
-		# self.waypoints[self.iMap][(113, 8)].append((96, 8))
-		self.mode = True
+		self.mode = False
 		self.initUI()
 
 	def mousePressEvent(self, event):
@@ -163,6 +160,11 @@ class mapView(QtGui.QWidget):
 				tileSet[self.iMap][y][x].explored = True
 				self.setEnd = False
 			self.update()
+		if not self.mode:
+			if (x,y) in self.waypoints[self.iMap]:
+				self.waypoints[self.iMap].remove((x,y))
+			else:
+				self.waypoints[self.iMap].append((x,y))
 		print(str(x) + "," + str(y))
 			
 	def changeMode(self):
@@ -191,13 +193,9 @@ class mapView(QtGui.QWidget):
 		self.update()
 	
 	def reset_state(self):
-		tileSet = self.getTileSet()
-		for row in tileSet[self.iMap]:
-			for elem in row:
-				elem.explored = False
-				elem.final = False
-		self.setStart = True
-		self.setEnd = True
+		filePickle = open("waypoints_" + str(self.iMap), "wb")
+		pickle.dump(self.waypoints[self.iMap], filePickle)
+		filePickle.close()
 		self.update()
 
 	def a_star_on_tiles(self):
@@ -235,34 +233,7 @@ class mapView(QtGui.QWidget):
 		qp = QtGui.QPainter()
 		qp.begin(self)
 		self.drawRectangles(qp)
-		if not self.mode:
-			self.drawLines(qp)
 		qp.end()
-	
-	def drawLines(self, qp):
-		pen = QtGui.QPen(QtCore.Qt.blue, 2, QtCore.Qt.SolidLine)
-		visited = []
-		drawn = []
-		to_visit = list(self.waypoints[self.iMap].keys())
-		qp.setPen(pen)
-		while len(to_visit) > 0:
-			cur = to_visit[0]
-			to_visit.remove(cur)
-			if cur in visited:
-				continue
-			visited.append(cur)
-			for adj in self.waypoints[self.iMap][cur]:
-				if (cur, adj) in drawn or (adj, cur) in drawn:
-					continue
-				else:
-					half_size = self.sizeDraw / 2
-					qp.drawLine(
-						cur[0] * self.sizeDraw + half_size,
-						cur[1] * self.sizeDraw + half_size,
-						adj[0] * self.sizeDraw + half_size,
-						adj[1] * self.sizeDraw + half_size)
-			
-		
 	    
 	def drawRectangles(self, qp):  
 		color = QtGui.QColor(0, 0, 0)
@@ -380,5 +351,5 @@ if __name__ == "__main__":
 	ui.resetButton.clicked.connect(ui.widget.reset_state)
 		
 	MainWindow.show()
-		
+
 	sys.exit(app.exec_())
